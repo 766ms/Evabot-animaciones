@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Eva</title>
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #dbe9f7;
+            /* solo para probar */
+        }
+
+        /* Eva flotando abajo a la derecha, como Alix */
+        #eva {
+            position: fixed;
+            right: 24px;
+            bottom: 0;
+            height: min(70vh, 460px);
+            aspect-ratio: 480 / 854;
+            cursor: pointer;
+        }
+
+        #eva img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center bottom;
+            transform-origin: 50% 100%;
+            transition: opacity 0.4s ease;
+        }
+
+        /* El saludo empieza oculto y el PNG de reposo está visible */
+        #saludo {
+            opacity: 0;
+        }
+
+        #eva.saludando #saludo {
+            opacity: 1;
+        }
+
+        #eva.saludando #reposo {
+            opacity: 0;
+        }
+
+        /* Reposo: respira y se balancea suave */
+        #reposo {
+            animation: respirar 4s ease-in-out infinite,
+                balanceo 6s ease-in-out infinite;
+        }
+
+        /* Mientras sale la respuesta: rebote un poco más rápido */
+        #eva.hablando #reposo {
+            animation: respirar 4s ease-in-out infinite,
+                hablar 0.45s ease-in-out infinite;
+        }
+
+        @keyframes respirar {
+
+            0%,
+            100% {
+                scale: 1 1;
+            }
+
+            50% {
+                scale: 1.01 1.02;
+            }
+        }
+
+        @keyframes balanceo {
+
+            0%,
+            100% {
+                rotate: -0.8deg;
+                translate: -4px 0;
+            }
+
+            50% {
+                rotate: 0.8deg;
+                translate: 4px -3px;
+            }
+        }
+
+        @keyframes hablar {
+
+            0%,
+            100% {
+                translate: 0 0;
+                rotate: 0deg;
+            }
+
+            50% {
+                translate: 0 -6px;
+                rotate: 0.6deg;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="eva">
+        <img id="reposo" src="eva.png" alt="Eva">
+        <img id="saludo" alt="">
+    </div>
+
+    <script>
+        const eva = document.getElementById('eva');
+        const saludo = document.getElementById('saludo');
+
+        const DURACION_MS = 2430;  // lo que dura tu animación
+        const FADE_MS = 400;       // igual al transition de arriba
+        let timer;
+
+        function saludar() {
+            clearTimeout(timer);
+            eva.classList.remove('saludando');
+
+            // El temporizador empieza cuando el WebP ya cargó, para que no se corte
+            saludo.onload = () => {
+                saludo.onload = null;
+                eva.classList.add('saludando');
+                timer = setTimeout(
+                    () => eva.classList.remove('saludando'),
+                    DURACION_MS - FADE_MS
+                );
+            };
+            saludo.src = 'eva.webp?' + Date.now();
+        }
+
+        // Úsala desde tu chat: hablando(true) al enviar, hablando(false) al terminar la respuesta
+        function hablando(activo) {
+            eva.classList.toggle('hablando', activo);
+        }
+
+        window.addEventListener('load', saludar);  // saluda al abrir la página
+        eva.addEventListener('click', saludar);    // y otra vez al hacer clic (para probar)
+    </script>
+
+</body>
